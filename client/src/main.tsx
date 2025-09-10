@@ -6,6 +6,8 @@ import { RouterProvider } from "react-router";
 import Layout from "./components/layout.tsx";
 import App from "./routes/app.tsx";
 import { ThemeProvider } from "./context/theme-provider.tsx";
+import Register from "./routes/register.tsx";
+import "react-image-crop/dist/ReactCrop.css";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +17,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         Component: App,
+      },
+      {
+        path: "/signup",
+        Component: Register,
       },
     ],
   },

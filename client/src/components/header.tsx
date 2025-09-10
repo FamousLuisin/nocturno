@@ -34,7 +34,7 @@ export default function Header() {
             Sign in
           </Button>
         </Link>
-        <Link to="/singup">
+        <Link to="/signup">
           <Button variant="secondary" className="cursor-pointer">
             Sign up
           </Button>
