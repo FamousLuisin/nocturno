@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor @AllArgsConstructor
 @Entity(name = "tb_users") @Table(name = "tb_users")
-public class UserModel {
+public class UserModel{
     
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
