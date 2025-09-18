@@ -1,16 +1,11 @@
 package com.nocturno.api.config.filter;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,10 +18,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CookieAuthFilter extends OncePerRequestFilter {
 
-    private final JwtDecoder jwtDecoder;
+    private final AuthenticationManager authenticationManager;
 
-    public CookieAuthFilter(JwtDecoder jwtDecoder) {
-        this.jwtDecoder = jwtDecoder;
+    public CookieAuthFilter(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -39,17 +34,9 @@ public class CookieAuthFilter extends OncePerRequestFilter {
             for (Cookie cookie : request.getCookies()) {
                 if ("NOCTURNO_TOKEN".equals(cookie.getName())) {
                     String tokenString = cookie.getValue();
-
-                    try {
-                        Jwt token = jwtDecoder.decode(tokenString);
-                        String scope = String.format("SCOPE_%s", token.getClaimAsString("scope"));
-                        Collection<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(scope));
-                        JwtAuthenticationToken jwt = new JwtAuthenticationToken(token, authorities);
-                        SecurityContextHolder.getContext().setAuthentication(jwt);
-                    } catch (JwtException ex) {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        return;
-                    }
+                    BearerTokenAuthenticationToken authRequest = new BearerTokenAuthenticationToken(tokenString);
+                    Authentication authResult = authenticationManager.authenticate(authRequest);
+                    SecurityContextHolder.getContext().setAuthentication(authResult);
                     break;
                 }
             }
