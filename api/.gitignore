@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### rsakey ###
+*.key
+*.pem
+*.pub
