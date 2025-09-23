@@ -46,13 +46,16 @@ public class UserModel{
     @CreationTimestamp
     private LocalDate createdAt;
 
-    public UserModel(String displayName, String username, String email, String password, String bio, LocalDate birthday){
+    private String picture;
+
+    public UserModel(String displayName, String username, String email, String password, String bio, LocalDate birthday, String picture){
         this.displayName = displayName;
         this.username = username;
         this.email = email;
         this.password = password;
         this.bio = bio;
         this.birthday = birthday;
+        this.picture = picture;
     }
 
     @PrePersist

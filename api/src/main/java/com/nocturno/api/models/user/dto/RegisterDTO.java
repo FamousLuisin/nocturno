@@ -16,4 +16,5 @@ public class RegisterDTO {
     private String confirmPassword;
     private String bio;
     private LocalDate birthday;
+    private String picture;
 }
