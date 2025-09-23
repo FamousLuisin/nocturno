@@ -61,7 +61,8 @@ public class AuthService {
                 dto.getEmail(),
                 dto.getPassword(),
                 dto.getBio(),
-                dto.getBirthday()
+                dto.getBirthday(),
+                dto.getPicture()
         );
 
         try {

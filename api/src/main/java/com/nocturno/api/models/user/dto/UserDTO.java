@@ -15,4 +15,5 @@ public class UserDTO {
     private String displayName;
     private String bio;
     private LocalDate birthday;
+    private String picture;
 }
