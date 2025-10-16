@@ -5,7 +5,9 @@ import { Form } from "@/components/ui/form";
 import { Button } from "./ui/button";
 import ImageCropper from "./imageCropper";
 import NewField from "./newField";
-import { UserRoundPlus } from "lucide-react";
+import { LoaderCircle, UserRoundPlus } from "lucide-react";
+import { useNavigate } from "react-router";
+import { useState } from "react";
 
 const formSchema = z
   .object({
@@ -13,7 +15,6 @@ const formSchema = z
       error: "Username must be at least 2 characters.",
     }),
     image: z.string().min(1, { error: "Mandatory image" }),
-    name: z.string().min(1, { error: "Name must be at least 2 characters." }),
     displayname: z
       .string()
       .min(1, { error: "Displayname must be at least 2 characters." }),
@@ -51,11 +52,51 @@ export default function RegisterForm() {
     defaultValues: {
       username: "",
       image: "",
+      birth: "",
+      password: "",
+      confirmPassword: "",
+      displayname: "",
+      email: ""
     },
   });
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState<Boolean>(false)
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true)
+
+    const url = "http://localhost:8080/auth/register"
+
+    const req = new Request(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials:"include",
+      body: JSON.stringify({
+        username: values.username,
+        displayName: values.displayname,
+        birthday: values.birth,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        email: values.email,
+        picture: values.image
+      })
+    })
+
+    try {
+      const response = await fetch(req)
+
+      if(!response.ok){
+        throw new Error("error when registering")
+      }
+
+      navigate("/")
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -116,7 +157,7 @@ export default function RegisterForm() {
             placeholder="confirm password"
             type="password"
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit">{loading ? <span className="animate-spin">< LoaderCircle /> </span> : <span>Submit</span>}</Button>
         </form>
       </Form>
     </div>
