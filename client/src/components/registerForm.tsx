@@ -65,7 +65,7 @@ export default function RegisterForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
 
-    const url = "http://localhost:8080/auth/register"
+    const url = `${import.meta.env.VITE_URL_API_AUTH}/register`
 
     const req = new Request(url, {
       method: "POST",

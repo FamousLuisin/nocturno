@@ -27,7 +27,7 @@ export default function LoginForm(){
     async function onSubmit(values: z.infer<typeof formSchema>){
         setLoading(true)
 
-        const url = "http://localhost:8080/auth/login"
+        const url = `${import.meta.env.VITE_URL_API_AUTH}/login`
 
         const req = new Request(url, {
             method: "POST",
