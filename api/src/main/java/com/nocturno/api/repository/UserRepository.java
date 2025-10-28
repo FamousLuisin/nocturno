@@ -9,4 +9,6 @@ import com.nocturno.api.models.user.UserModel;
 public interface UserRepository extends JpaRepository<UserModel, UUID> {
     
     UserModel findByEmail(String email);
+
+    UserModel findByUsername(String username);
 }
