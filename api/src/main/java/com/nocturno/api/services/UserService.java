@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.nocturno.api.models.user.UserModel;
+import com.nocturno.api.models.user.dto.UpdateDTO;
 import com.nocturno.api.models.user.dto.UserDTO;
 import com.nocturno.api.repository.UserRepository;
 
@@ -57,5 +58,31 @@ public class UserService {
         });
 
         return usersDTO;
+    }
+
+    public UserDTO updateUser(String id, UpdateDTO dto){
+        UserModel user = userRepository.findById(UUID.fromString(id)).orElse(null);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "error: user not found");
+        }
+
+        user.setBio(dto.getBio());
+        user.setDisplayName(dto.getDisplayName());
+        user.setUsername(dto.getUsername());
+
+        userRepository.save(user);
+
+        return mapper.map(user, UserDTO.class);
+    }
+
+    public void deleteUser(String id){
+        UserModel user = userRepository.findById(UUID.fromString(id)).orElse(null);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "error: user not found");
+        }
+
+        userRepository.delete(user);
     }
 }
