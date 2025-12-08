@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.nocturno.api.models.user.Status;
 import com.nocturno.api.models.user.UserModel;
 import com.nocturno.api.models.user.dto.UpdateDTO;
 import com.nocturno.api.models.user.dto.UserDTO;
@@ -83,6 +84,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "error: user not found");
         }
 
-        userRepository.delete(user);
+        user.setStatus(Status.DELETED);
+        userRepository.save(user);
     }
 }
