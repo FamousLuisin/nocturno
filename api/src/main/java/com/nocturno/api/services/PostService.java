@@ -1,0 +1,70 @@
+package com.nocturno.api.services;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.nocturno.api.models.post.PostModel;
+import com.nocturno.api.models.post.dto.PostCreateDTO;
+import com.nocturno.api.models.post.dto.PostDTO;
+import com.nocturno.api.models.user.UserModel;
+import com.nocturno.api.repository.PostRepository;
+import com.nocturno.api.repository.UserRepository;
+
+@Service
+public class PostService {
+    
+    private UserRepository userRepository;
+    private PostRepository postRepository;
+
+    public PostService(UserRepository userR, PostRepository postR){
+        this.postRepository = postR;
+        this.userRepository = userR;
+    }
+
+    public PostDTO newPost(PostCreateDTO dto, String userId){
+        
+        UserModel user = userRepository.findById(UUID.fromString(userId)).orElse(null);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
+
+        PostModel post = new PostModel(dto.getContent(), user);
+
+        post = postRepository.save(post);
+        
+        return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), user.getUsername());
+    }
+
+    public List<PostDTO> getAllPosts(){
+        List<PostModel> posts = postRepository.findAll();
+
+        List<PostDTO> dto = new ArrayList<>();
+
+        posts.forEach(post -> {
+            dto.add(new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername()));
+        });
+
+        return dto;
+    }
+
+    public List<PostDTO> getPostsByUser(String username){
+        UserModel user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
+
+        List<PostModel> posts = postRepository.findByCreator(user);
+
+        return posts
+            .stream()
+            .map(post -> new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername()))
+            .toList();
+    }
+}
