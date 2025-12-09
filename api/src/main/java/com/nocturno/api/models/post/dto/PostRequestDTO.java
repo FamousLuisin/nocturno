@@ -6,6 +6,6 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor @NoArgsConstructor
 @Data
-public class PostCreateDTO {
+public class PostRequestDTO {
     private String content;
 }

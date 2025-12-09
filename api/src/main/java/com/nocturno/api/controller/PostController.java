@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.nocturno.api.models.post.dto.PostCreateDTO;
+import com.nocturno.api.models.post.dto.PostRequestDTO;
 import com.nocturno.api.services.PostService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController
@@ -28,7 +30,7 @@ public class PostController {
     private PostService postService;
 
     @PostMapping
-    public ResponseEntity<?> createPost(@RequestBody PostCreateDTO postDTO){
+    public ResponseEntity<?> createPost(@RequestBody PostRequestDTO postDTO){
 
         try {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -67,6 +69,19 @@ public class PostController {
             postService.deletePost(id, jwt.getSubject());
 
             return ResponseEntity.ok(null);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePost(@PathVariable String id, @RequestBody PostRequestDTO dto) {
+        try {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            var post = postService.updatePost(id, dto, jwt.getSubject());
+
+            return ResponseEntity.status(HttpStatus.OK).body(post);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
         }

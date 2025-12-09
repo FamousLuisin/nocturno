@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.nocturno.api.models.post.PostModel;
-import com.nocturno.api.models.post.dto.PostCreateDTO;
+import com.nocturno.api.models.post.dto.PostRequestDTO;
 import com.nocturno.api.models.post.dto.PostDTO;
 import com.nocturno.api.models.user.UserModel;
 import com.nocturno.api.repository.PostRepository;
@@ -27,7 +27,7 @@ public class PostService {
         this.userRepository = userR;
     }
 
-    public PostDTO newPost(PostCreateDTO dto, String userId){
+    public PostDTO newPost(PostRequestDTO dto, String userId){
         
         UserModel user = userRepository.findById(UUID.fromString(userId)).orElse(null);
 
@@ -70,7 +70,15 @@ public class PostService {
     }
 
     public void deletePost(String id, String userId){
-        PostModel post = postRepository.findById(UUID.fromString(id)).orElse(null);
+        UUID postId;
+
+        try {
+            postId = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid UUID format");
+        }
+
+        PostModel post = postRepository.findById(postId).orElse(null);
 
         if (post == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
@@ -82,5 +90,32 @@ public class PostService {
 
         post.setDeletedAt(LocalDateTime.now());
         postRepository.save(post);
+    }
+
+    public PostDTO updatePost(String id, PostRequestDTO dto, String userId){
+        UUID postId;
+
+        try {
+            postId = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid UUID format");
+        }
+
+        PostModel post = postRepository.findById(postId).orElse(null);
+
+        if (post == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+        }
+
+        if (!post.getCreator().getId().equals(UUID.fromString(userId))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        post.setContent(dto.getContent());
+        post.setUpdatedAt(LocalDateTime.now());
+
+        postRepository.save(post);
+
+        return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername());
     }
 }
