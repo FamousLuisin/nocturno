@@ -1,5 +1,6 @@
 package com.nocturno.api.services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -66,5 +67,20 @@ public class PostService {
             .stream()
             .map(post -> new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername()))
             .toList();
+    }
+
+    public void deletePost(String id, String userId){
+        PostModel post = postRepository.findById(UUID.fromString(id)).orElse(null);
+
+        if (post == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+        }
+
+        if (!post.getCreator().getId().equals(UUID.fromString(userId))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+        }
+
+        post.setDeletedAt(LocalDateTime.now());
+        postRepository.save(post);
     }
 }

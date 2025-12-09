@@ -14,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.nocturno.api.models.post.dto.PostCreateDTO;
 import com.nocturno.api.services.PostService;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -52,6 +54,19 @@ public class PostController {
             var posts = postService.getPostsByUser(username);
 
             return ResponseEntity.status(HttpStatus.OK).body(posts);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
+        }
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable String id){
+        try {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            postService.deletePost(id, jwt.getSubject());
+
+            return ResponseEntity.ok(null);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
         }
