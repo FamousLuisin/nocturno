@@ -46,15 +46,41 @@ public class AuthService {
 
     public String loginService(LoginDTO dto){
         validateEmail(dto.getEmail());
-        UserModel user = userRepository.findByEmailAndStatus(dto.getEmail(), Status.ACTIVE);
+        UserModel user = userRepository.findByEmail(dto.getEmail());
 
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
         }
 
+        if (!user.getStatus().equals(Status.ACTIVE)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, 
+                String.format("unable to reactivate the account because the user is %s", user.getStatus()));
+        }
+
         this.passwordMatch(dto.getPassword(), user.getPassword());
 
         return this.generateJwt(user);
+    }
+
+    public String reactivateService(LoginDTO login){
+        validateEmail(login.getEmail());
+        UserModel user = userRepository.findByEmail(login.getEmail());
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
+
+        if (!user.getStatus().equals(Status.DELETED)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                String.format("unable to reactivate the account because the user is %s", user.getStatus()));
+        }
+
+        this.passwordMatch(login.getPassword(), user.getPassword());
+
+        user.setStatus(Status.ACTIVE);
+        userRepository.save(user);
+        
+        return generateJwt(user);
     }
 
     public String registerService(RegisterDTO dto) {
@@ -78,7 +104,7 @@ public class AuthService {
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "user already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "user already exists. Please check the email, username, or display name.");
         }
 
         return this.generateJwt(user);
@@ -86,19 +112,22 @@ public class AuthService {
 
     private void validateUsername(String username){
         if (!Pattern.matches(REGEX_USERNAME, username)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid username format. Minimum 5 characters, only letters, numbers, and underscore are allowed");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "invalid username format. Minimum 5 characters, only letters, numbers, and underscore are allowed");
         }
     }
 
     private void validateEmail(String email){
         if (!Pattern.matches(REGEX_EMAIL, email)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid email format. Please provide a valid email address");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "invalid email format. Please provide a valid email address");
         }
     }
 
     private void validateDisplayName(String displayName){
         if (!Pattern.matches(REGEX_DISPLAYNAME, displayName)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid display name format. Minimum 4 characters are required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "invalid display name format. Minimum 4 characters are required");
         }
     }
 
@@ -108,7 +137,8 @@ public class AuthService {
                     "password and confirm password are different");
         }
         if (!Pattern.matches(REGEX_PASSWORD, password)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character");
         }
     }
 

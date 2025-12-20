@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,10 +41,7 @@ public class AuthController {
             Token token = new Token();
             token.setToken(tokenString);
 
-            Cookie cookie = new Cookie("NOCTURNO_TOKEN", tokenString);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            Cookie cookie = createCookieJwt(tokenString);
             response.addCookie(cookie);
             
             return ResponseEntity.ok().body(token);
@@ -60,10 +58,7 @@ public class AuthController {
             Token token = new Token();
             token.setToken(tokenString);
 
-            Cookie cookie = new Cookie("NOCTURNO_TOKEN", tokenString);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
+            Cookie cookie = createCookieJwt(tokenString);
             response.addCookie(cookie);
             
             return ResponseEntity.ok().body(token);
@@ -72,4 +67,38 @@ public class AuthController {
         }   
     }
     
+    @PostMapping("/reactivate")
+    public ResponseEntity<?> reativateController(@RequestBody LoginDTO dto, HttpServletResponse response){
+        try {
+            var tokenString = authService.reactivateService(dto);
+            Token token = new Token();
+            token.setToken(tokenString);
+
+            Cookie cookie = createCookieJwt(tokenString);
+            response.addCookie(cookie);
+
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutContoller(HttpServletResponse response) {
+        Cookie cookie = createCookieJwt("");
+        cookie.setMaxAge(0);
+        
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(null);
+    }
+
+    private Cookie createCookieJwt(String token){
+        Cookie cookie = new Cookie("NOCTURNO_TOKEN", token);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+
+        return cookie;
+    }
 }
