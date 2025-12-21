@@ -9,10 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.nocturno.api.models.like.LikePostModel;
 import com.nocturno.api.models.post.PostModel;
 import com.nocturno.api.models.post.dto.PostRequestDTO;
 import com.nocturno.api.models.post.dto.PostDTO;
 import com.nocturno.api.models.user.UserModel;
+import com.nocturno.api.repository.LikePostRepository;
 import com.nocturno.api.repository.PostRepository;
 import com.nocturno.api.repository.UserRepository;
 
@@ -21,10 +23,12 @@ public class PostService {
     
     private UserRepository userRepository;
     private PostRepository postRepository;
+    private LikePostRepository likePostRepository;
 
-    public PostService(UserRepository userR, PostRepository postR){
+    public PostService(UserRepository userR, PostRepository postR, LikePostRepository likePostR){
         this.postRepository = postR;
         this.userRepository = userR;
+        this.likePostRepository = likePostR;
     }
 
     public PostDTO newPost(PostRequestDTO dto, String userId){
@@ -117,5 +121,37 @@ public class PostService {
         postRepository.save(post);
 
         return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername());
+    }
+
+    public void likePost(String post, String user){
+
+        UUID postId;
+        UUID userId;
+
+        try {
+            postId = UUID.fromString(post);
+            userId = UUID.fromString(user);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid UUID format");
+        }
+        
+        UserModel userRef = userRepository.getReferenceById(userId);
+        PostModel postRef = postRepository.findById(postId).orElse(null);
+
+        if (postRef == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+        }
+
+        LikePostModel like = likePostRepository.findByPostAndUser(postRef, userRef);
+
+        if (like != null) {
+            likePostRepository.delete(like);
+            return;
+        }
+
+        like = new LikePostModel();
+        like.setPost(postRef);
+        like.setUser(userRef);
+        likePostRepository.save(like);
     }
 }
