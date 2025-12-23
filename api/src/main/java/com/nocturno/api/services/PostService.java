@@ -146,6 +146,7 @@ public class PostService {
 
         if (like != null) {
             likePostRepository.delete(like);
+            postRepository.removeLikes(postId);
             return;
         }
 
@@ -153,5 +154,6 @@ public class PostService {
         like.setPost(postRef);
         like.setUser(userRef);
         likePostRepository.save(like);
+        postRepository.addLikes(postId);
     }
 }
