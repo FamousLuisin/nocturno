@@ -87,4 +87,17 @@ public class PostController {
         }
     }
     
+    @PostMapping("/like/{id}")
+    public ResponseEntity<?> postLike(@PathVariable String id) {
+        try {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            postService.likePost(id, jwt.getSubject());
+
+            return ResponseEntity.ok(null);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
+        }
+    }
+    
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
 
 import com.nocturno.api.models.user.UserModel;
 
@@ -22,6 +23,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor @NoArgsConstructor
 @Entity(name = "tb_posts") @Table(name = "tb_posts")
+@DynamicInsert
 public class PostModel {
     
     @Id @GeneratedValue(strategy = GenerationType.UUID)
@@ -42,6 +44,9 @@ public class PostModel {
     @ManyToOne
     @JoinColumn(name = "creator")
     private UserModel creator;
+
+    @Column(name = "number_likes")
+    private Integer numberLikes;
 
     public PostModel(String content, UserModel creator){
         this.content = content;
