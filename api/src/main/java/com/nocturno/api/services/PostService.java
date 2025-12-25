@@ -43,7 +43,7 @@ public class PostService {
 
         post = postRepository.save(post);
         
-        return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), user.getUsername());
+        return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), user.getUsername(), post.getNumberLikes());
     }
 
     public List<PostDTO> getAllPosts(){
@@ -52,7 +52,7 @@ public class PostService {
         List<PostDTO> dto = new ArrayList<>();
 
         posts.forEach(post -> {
-            dto.add(new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername()));
+            dto.add(new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername(), post.getNumberLikes()));
         });
 
         return dto;
@@ -69,7 +69,7 @@ public class PostService {
 
         return posts
             .stream()
-            .map(post -> new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername()))
+            .map(post -> new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername(), post.getNumberLikes()))
             .toList();
     }
 
@@ -120,7 +120,7 @@ public class PostService {
 
         postRepository.save(post);
 
-        return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername());
+        return new PostDTO(post.getId(), post.getContent(), post.getCreatedAt(), post.getCreator().getUsername(), post.getNumberLikes());
     }
 
     public void likePost(String post, String user){
