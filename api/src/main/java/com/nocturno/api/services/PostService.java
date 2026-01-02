@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.nocturno.api.models.like.LikePostModel;
+import com.nocturno.api.models.like.dto.LikePostDTO;
 import com.nocturno.api.models.post.PostModel;
 import com.nocturno.api.models.post.dto.PostRequestDTO;
 import com.nocturno.api.models.post.dto.PostDTO;
@@ -155,5 +156,23 @@ public class PostService {
         like.setUser(userRef);
         likePostRepository.save(like);
         postRepository.addLikes(postId);
+    }
+
+    public List<LikePostDTO> getLikePost(String id){
+        UUID postId;
+
+        try {
+            postId = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid UUID format");
+        }
+
+        if (!postRepository.existsById(postId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+        }
+
+        List<LikePostDTO> lp = likePostRepository.findLikesByPost(postId);
+        
+        return lp;
     }
 }

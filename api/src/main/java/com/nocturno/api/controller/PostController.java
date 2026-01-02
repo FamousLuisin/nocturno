@@ -100,4 +100,15 @@ public class PostController {
         }
     }
     
+    @GetMapping("/like/{id}")
+    public ResponseEntity<?> getLikesByPost(@PathVariable String id) {
+        
+        try {
+            var likePost = postService.getLikePost(id);
+            return ResponseEntity.status(HttpStatus.OK).body(likePost);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
+        }
+    }
+    
 }
