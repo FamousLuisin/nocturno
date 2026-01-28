@@ -8,6 +8,7 @@ import NewField from "./newField";
 import { LoaderCircle, UserRoundPlus } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import { useAuth } from "@/context/auth-provider";
 
 const formSchema = z
   .object({
@@ -60,7 +61,8 @@ export default function RegisterForm() {
     },
   });
   const navigate = useNavigate()
-  const [loading, setLoading] = useState<Boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
+  const { setAuth } = useAuth();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
@@ -91,6 +93,7 @@ export default function RegisterForm() {
         throw new Error("error when registering")
       }
 
+      setAuth(true)
       navigate("/")
     } catch (error) {
       console.log(error)
@@ -100,7 +103,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="border-1 border-zinc-500 rounded-2xl min-w-sm flex flex-col gap-2">
+    <div className="border border-zinc-500 rounded-2xl min-w-sm flex flex-col gap-2">
       <div className="flex items-center gap-2 p-4 border-b">
         <UserRoundPlus size={36} />
         <span className="text-2xl text-primary font-semibold">Register</span>

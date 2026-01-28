@@ -6,6 +6,7 @@ import { RouterProvider } from "react-router";
 import Layout from "./components/layout.tsx";
 import App from "./routes/app.tsx";
 import { ThemeProvider } from "./context/theme-provider.tsx";
+import { AuthProvider } from "./context/auth-provider.tsx";
 import Register from "./routes/register.tsx";
 import "react-image-crop/dist/ReactCrop.css";
 import Login from "./routes/login.tsx";
@@ -34,7 +35,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>
 );

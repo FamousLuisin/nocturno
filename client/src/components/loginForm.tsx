@@ -7,6 +7,7 @@ import { LoaderCircle, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import { useAuth } from "@/context/auth-provider";
 
 const formSchema = z.object({
     email: z.email(),
@@ -22,7 +23,8 @@ export default function LoginForm(){
         }
     })
     const navigate = useNavigate()
-    const [loading, setLoading] = useState<Boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
+    const { setAuth } = useAuth();
 
     async function onSubmit(values: z.infer<typeof formSchema>){
         setLoading(true)
@@ -48,6 +50,7 @@ export default function LoginForm(){
                 throw new Error("error when logging in")
             }
 
+            setAuth(true)
             navigate("/")
         } catch (error) {
             console.log(error)
@@ -57,7 +60,7 @@ export default function LoginForm(){
     }
 
     return (
-        <div className="border-1 border-zinc-500 rounded-2xl min-w-sm flex flex-col gap-2">
+        <div className="border border-zinc-500 rounded-2xl min-w-sm flex flex-col gap-2">
             <div className="flex items-center gap-2 p-4 border-b">
                 <LogIn size={36} />
                 <span className="text-2xl text-primary font-semibold">Register</span>
